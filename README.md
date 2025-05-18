@@ -34,9 +34,8 @@ interval. A schedule definition of:
 "myschedule" : [ {"Day":1}, {"Week":2}, {"Month":1}, {"Long":1} ],
 ```
 
-would ensure one file that is at most a day old is kept, two files
-at least a week old, one at least a month old and one will be kept
-for eternity.
+would ensure that as many files that fit into the next bigger interval
+will be kept. The **Long** interval is so you can keep some files forever.
 
 Let's demonstrate this with an example:
 
