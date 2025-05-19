@@ -31,7 +31,6 @@ var list_cmd = &cobra.Command{
 List all filenames that should be pruned according to the given schedule.
 Only files matched by the glob pattern are considered.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//log.Printf("prunhild version %s\n", Version)
 		schedule := sched.BuiltinSchedules[fSchedule]
 		fsys := os.DirFS(".")
 		fileNames, _ := fs.Glob(fsys, fGlob)

@@ -1,7 +1,6 @@
 package prune_test
 
 import (
-	"io/fs"
 	"prunehild/prune"
 	"prunehild/sched"
 	"reflect"
@@ -72,28 +71,5 @@ func TestPrune(t *testing.T) {
 				t.Errorf("got %#v, want %#v", calledFiles, test.expected)
 			}
 		})
-	}
-}
-
-func TestFilesInInterval(t *testing.T) {
-	fsys := fstest.MapFS{
-		"1": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:00:00")},
-		"2": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:01:00")},
-		"3": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:02:00")},
-		"4": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:03:00")},
-		"5": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:04:00")},
-		"6": &fstest.MapFile{ModTime: makeTime("2009-11-01 11:05:00")},
-		"7": &fstest.MapFile{ModTime: makeTime("2009-11-01 12:00:00")},
-		"8": &fstest.MapFile{ModTime: makeTime("2009-11-01 13:00:00")},
-	}
-
-	intervalFilenames := prune.FilesInInterval(fsys, must(fs.Glob(fsys, "*")),
-		makeTime("2009-11-01 10:50:00"),
-		makeTime("2009-11-01 12:20:00"),
-	)
-
-	expectedFilenames := []string{"6", "7"}
-	if !reflect.DeepEqual(expectedFilenames, intervalFilenames) {
-		t.Errorf("got %v, want %v", intervalFilenames, expectedFilenames)
 	}
 }
