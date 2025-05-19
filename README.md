@@ -1,5 +1,8 @@
 # Prunehild
 
+> [!WARNING]
+> Work in progress. This is not release grade yet.
+
 A file pruning utility
 
 Prunehild takes a list of files, and based on a given schedule, it will
