@@ -19,8 +19,7 @@ func intervalDuration(sched []time.Duration, i int) time.Duration {
 	return sched[i] + intervalDuration(sched, i-1)
 }
 
-func Prune(fsys fs.FS, filenames []string, now time.Time, sched []time.Duration, callback func(fn string)) {
-	const maxKeep = 2
+func Prune(fsys fs.FS, filenames []string, now time.Time, sched []time.Duration, keepMax int, callback func(fn string)) {
 	var pruneRemaining func()
 	remaining := slices.Clone(filenames)
 
@@ -38,7 +37,7 @@ func Prune(fsys fs.FS, filenames []string, now time.Time, sched []time.Duration,
 			}
 
 			// highest interval in sched
-			if (i == len(sched)-2) && (len(intervalFilenames) > maxKeep) {
+			if (i == len(sched)-2) && (len(intervalFilenames) > keepMax) {
 				callback(intervalFilenames[0])
 				delIndex := slices.Index(remaining, intervalFilenames[0])
 				remaining = slices.Delete(remaining, delIndex, delIndex+1)

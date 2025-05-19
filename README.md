@@ -9,7 +9,7 @@ for the pruned files, the most common action would probably be "delete".
 The schedule will decide which ones to keep on which ones to delete.
 
 The idea is to use this for example in a directory that is full of
-backup files like
+backup files. The older they are, the more of them you can 'forget'. Like
 
 ```
 backup-sqldump-1.gz
@@ -53,6 +53,11 @@ option or pipe the output to another command.
 ### Delete
 
 Removes the files from disk. Use with care.
+
+### Result
+
+Print the names of the files that would be unaffected by pruning. This
+can be seen as a dry run to see which files will stay after `prunhild delete`.
 
 ### Move
 
