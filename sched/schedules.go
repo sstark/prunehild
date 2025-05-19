@@ -45,3 +45,10 @@ var BuiltinSchedules = map[string][]time.Duration{
 		Long,
 	},
 }
+
+var BuiltinSchedulesDescription = map[string]string{
+	"ph0": "Mainly useful for testing",
+	"ph1": "Day/Week/Month/Quarter/Year",
+	"ph2": "Day/Week/Month/Quarter",
+	"ph3": "Day/Week/Month",
+}

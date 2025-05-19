@@ -28,7 +28,8 @@ var list_cmd = &cobra.Command{
 	Use:   "list",
 	Short: "List prune candidates",
 	Long: `
-FIXME`,
+List all filenames that should be pruned according to the given schedule.
+Only files matched by the glob pattern are considered.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//log.Printf("prunhild version %s\n", Version)
 		schedule := sched.BuiltinSchedules[fSchedule]
