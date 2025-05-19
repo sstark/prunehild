@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var rootCmd = &cobra.Command{
+var root_cmd = &cobra.Command{
 	Use:   "prunehild",
 	Short: "Prunehild is a file pruning utility",
 	Long: `Use it to thin out directories full of regularly created files (for example backups),
@@ -17,7 +17,7 @@ with a defined schedule based on file modification time.`,
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := root_cmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

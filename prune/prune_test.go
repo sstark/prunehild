@@ -1,6 +1,7 @@
 package prune_test
 
 import (
+	"io/fs"
 	"prunehild/prune"
 	"prunehild/schedules"
 	"reflect"
@@ -22,7 +23,7 @@ func makeTime(s string) time.Time {
 }
 
 func TestPrune(t *testing.T) {
-	fs := fstest.MapFS{
+	fsys := fstest.MapFS{
 		"01": &fstest.MapFile{ModTime: makeTime("2014-05-17 16:38:51")},
 		"02": &fstest.MapFile{ModTime: makeTime("2014-05-17 16:40:11")},
 		"03": &fstest.MapFile{ModTime: makeTime("2014-05-17 16:40:51")},
@@ -33,7 +34,7 @@ func TestPrune(t *testing.T) {
 		"08": &fstest.MapFile{ModTime: makeTime("2014-05-17 16:41:56")},
 		"09": &fstest.MapFile{ModTime: makeTime("2014-05-17 16:42:01")},
 	}
-	allFiles := must(fs.Glob("*"))
+	allFiles := must(fsys.Glob("*"))
 	slices.Sort(allFiles)
 	testSched := []time.Duration{
 		schedules.Second * 5,
@@ -63,7 +64,7 @@ func TestPrune(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.now.String(), func(t *testing.T) {
 			var calledFiles []string
-			prune.Prune(fs, allFiles, test.now, testSched, func(fn string) {
+			prune.Prune(fsys, allFiles, test.now, testSched, func(fn string) {
 				calledFiles = append(calledFiles, fn)
 			})
 
@@ -75,7 +76,7 @@ func TestPrune(t *testing.T) {
 }
 
 func TestFilesInInterval(t *testing.T) {
-	fs := fstest.MapFS{
+	fsys := fstest.MapFS{
 		"1": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:00:00")},
 		"2": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:01:00")},
 		"3": &fstest.MapFile{ModTime: makeTime("2009-11-01 10:02:00")},
@@ -86,7 +87,7 @@ func TestFilesInInterval(t *testing.T) {
 		"8": &fstest.MapFile{ModTime: makeTime("2009-11-01 13:00:00")},
 	}
 
-	intervalFilenames := prune.FilesInInterval(fs, must(fs.Glob("*")),
+	intervalFilenames := prune.FilesInInterval(fsys, must(fs.Glob(fsys, "*")),
 		makeTime("2009-11-01 10:50:00"),
 		makeTime("2009-11-01 12:20:00"),
 	)
