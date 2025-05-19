@@ -1,7 +1,6 @@
 package prune
 
 import (
-	"fmt"
 	"io/fs"
 	"slices"
 	"time"
@@ -22,43 +21,47 @@ func intervalDuration(sched []time.Duration, i int) time.Duration {
 
 func Prune(fsys fs.FS, filenames []string, now time.Time, sched []time.Duration, callback func(fn string)) {
 	const maxKeep = 2
-	var filenamesDone []string
+	var pruneRemaining func()
+	remaining := slices.Clone(filenames)
 
-	// interval 0 does not need pruning, start with 1
-	for i := len(sched) - 2; i > 0; i-- {
-		interval := sched[i]
-		intervalFilenames := FilesInInterval(fsys, filenames,
-			now.Add(-intervalDuration(sched, i+1)),
-			now.Add(-intervalDuration(sched, i)))
+	pruneRemaining = func() {
+		// interval 0 does not need pruning, start with 1
+		for i := len(sched) - 2; i > 0; i-- {
+			interval := sched[i]
+			intervalFilenames := FilesInInterval(fsys, remaining,
+				now.Add(-intervalDuration(sched, i+1)),
+				now.Add(-intervalDuration(sched, i)))
 
-		pruneAgain := false
-		if len(intervalFilenames) <= 2 {
-			continue
-		}
+			pruneAgain := false
+			if len(intervalFilenames) <= 2 {
+				continue
+			}
 
-		// highest interval in sched
-		if (i == len(sched)-2) && (len(intervalFilenames) > maxKeep) {
-			callback(intervalFilenames[0])
-			filenamesDone = append(filenamesDone, intervalFilenames[0])
-			pruneAgain = true
-		}
+			// highest interval in sched
+			if (i == len(sched)-2) && (len(intervalFilenames) > maxKeep) {
+				callback(intervalFilenames[0])
+				delIndex := slices.Index(remaining, intervalFilenames[0])
+				remaining = slices.Delete(remaining, delIndex, delIndex+1)
+				pruneAgain = true
+			}
 
-		// remaining intervals
-		youngest := intervalFilenames[len(intervalFilenames)-1]
-		secondYoungest := intervalFilenames[len(intervalFilenames)-2]
-		dist := modTime(fsys, youngest).Sub(modTime(fsys, secondYoungest))
-		if dist.Seconds() < interval.Seconds() && !slices.Contains(filenamesDone, youngest) {
-			callback(youngest)
-			filenamesDone = append(filenamesDone, youngest)
-			pruneAgain = true
-		}
+			// remaining intervals
+			youngest := intervalFilenames[len(intervalFilenames)-1]
+			secondYoungest := intervalFilenames[len(intervalFilenames)-2]
+			dist := modTime(fsys, youngest).Sub(modTime(fsys, secondYoungest))
+			if dist.Seconds() < interval.Seconds() {
+				callback(youngest)
+				delIndex := slices.Index(remaining, youngest)
+				remaining = slices.Delete(remaining, delIndex, delIndex+1)
+				pruneAgain = true
+			}
 
-		if pruneAgain {
-			filenames = subtractSlices(filenames, filenamesDone)
-			fmt.Printf("done: %#v\n", filenamesDone)
-			Prune(fsys, filenames, now, sched, callback)
+			if pruneAgain {
+				pruneRemaining()
+			}
 		}
 	}
+	pruneRemaining()
 }
 
 func subtractSlices(sl []string, subsl []string) (newsl []string) {
