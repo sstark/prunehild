@@ -3,7 +3,7 @@ package prune_test
 import (
 	"io/fs"
 	"prunehild/prune"
-	"prunehild/schedules"
+	"prunehild/sched"
 	"reflect"
 	"slices"
 	"testing"
@@ -37,11 +37,11 @@ func TestPrune(t *testing.T) {
 	allFiles := must(fsys.Glob("*"))
 	slices.Sort(allFiles)
 	testSched := []time.Duration{
-		schedules.Second * 5,
-		schedules.Second * 20,
-		schedules.Second * 40,
-		schedules.Second * 80,
-		schedules.Long,
+		sched.Second * 5,
+		sched.Second * 20,
+		sched.Second * 40,
+		sched.Second * 80,
+		sched.Long,
 	}
 	start := makeTime("2014-05-17 16:42:02")
 
@@ -64,7 +64,7 @@ func TestPrune(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.now.String(), func(t *testing.T) {
 			var calledFiles []string
-			prune.Prune(fsys, allFiles, test.now, testSched, func(fn string) {
+			prune.Prune(fsys, allFiles, test.now, testSched, 1, func(fn string) {
 				calledFiles = append(calledFiles, fn)
 			})
 
